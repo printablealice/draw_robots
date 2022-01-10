@@ -36,8 +36,6 @@ bool DRAG_2D_POINTS_(mat4 PV, int num_points, void *points_, vec3 color) {
 
 #define BEGIN_FRAME(PV, H, F, COLOR) POLL_INPUT();CAMERA_2D(PV, H);FULLSCREEN_TOGGLE(F);CLEAR_DRAW_BUFFER(COLOR)
 #define END_FRAME SWAP_DRAW_BUFFERS
-#define DRAW_PRIMITIVES_AS_OUTLINES() glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
-#define DRAW_PRIMITIVES_AS_FILLED() glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
 
 #define POINTS GL_POINTS
 #define LINES GL_LINES
@@ -47,6 +45,7 @@ bool DRAG_2D_POINTS_(mat4 PV, int num_points, void *points_, vec3 color) {
 #define TRIANGLE_STRIP GL_TRIANGLE_STRIP
 #define TRIANGLE_FAN GL_TRIANGLE_FAN
 #define QUADS _HACK_GL_QUADS
+
 #define RED monokaiRed
 #define ORANGE monokaiOrange
 #define YELLOW monokaiYellow
@@ -57,3 +56,8 @@ bool DRAG_2D_POINTS_(mat4 PV, int num_points, void *points_, vec3 color) {
 #define GRAY monokaiGray
 #define BLACK monokaiBlack
 
+////////////////////////////////////////////////////////////////////////////////
+// functions for lecture (please don't use)                                   //
+////////////////////////////////////////////////////////////////////////////////
+
+void DrawPoint2D(vec2 point, vec3 color) { DRAW_(2, POINTS, 1, &point, color); }

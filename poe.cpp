@@ -1,7 +1,77 @@
 #ifndef POE_CPP
 #define POE_CPP
 
-#define MODULO(x, N) (((x) % (N) + (N)) % (N))
+////////////////////////////////////////////////////////////////////////////////
+// just a messy file of helper macros and functions (will clean up by end)    //
+////////////////////////////////////////////////////////////////////////////////
+
+#define NITEMS(x) (sizeof(x) / sizeof(x[0]))   // number of items in fixed size array
+#define MODULO(x, N) (((x) % (N) + (N)) % (N)) // modulo that works on negative numbers
+
+#ifdef ASSERT_WAITS_FOR_YOU_TO_PRESS_ENTER_BEFORE_CRASHING
+#define ASSERT(b) if (!(b)) { \
+    printf("ASSERT Line %d in %s \n", __LINE__, __FILE__); \
+    printf("press Enter to crash");                        \
+    getchar();                                             \
+    *((volatile int *) 0) = 0;                             \
+}
+#else
+#define ASSERT(b) if (!(b)) { \
+    printf("ASSERT Line %d in %s \n", __LINE__, __FILE__); \
+    *((volatile int *) 0) = 0;                             \
+}
+#endif
+#define STATIC_ASSERT(b) static_assert(b, "STATIC_ASSERT")
+
+#define SGN(a) ((a) > 0 ? 1 : -1)
+#define AVG(a, b) (.5 * (a) + .5 * (b))
+#define ABS(x) ((x) < 0 ? -(x) : (x))
+#define LERP(t, a, b) ((1 - (t)) * (a) + (t) * (b))
+#define CLAMP(t, a, b) MIN(MAX(t, a), b)
+#define MAG_CLAMP(t, a) CLAMP(t, -(a), a)
+// #define CLAMPED_LERP(t, a, b) LERP(CLAMP(t, 0, 1), a, b)
+#define INVERSE_LERP(p, a, b) (((p) - (a)) / ((b) - (a)))
+
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MID(a, b, c) MAX(MIN((a), (b)), MIN(MAX((a), (b)), (c)))
+
+#define RAD(a) ((a) * PI / 180)
+#define DEG(a) ((a) * 180 / PI)
+
+#define elif else if
+#define for_(i, N) for (int i = 0; i < (N); ++i)
+#define for____(N) for (int _ = 0; _ < (N); ++_)
+#define stb_for_polygon(i, j, N_ij) for (int i = N_ij - 1, j = 0; j < N_ij; i = j, ++j)
+
+#define SWAP(a, b) do {                   \
+    ASSERT(sizeof(a) == sizeof(b));       \
+    void *__SWAP_tmp = malloc(sizeof(a)); \
+    memcpy(__SWAP_tmp, &a, sizeof(a));    \
+    memcpy(&a, &b, sizeof(b));            \
+    memcpy(&b, __SWAP_tmp, sizeof(b));    \
+} while (0)
+
+#define NOR(a, b) (!(a) && !(b))
+#define XOR(a, b) (((a) && !(b)) || (!(a) && (b)))
+
+#define TINY 1e-7
+#define BIG 1e5
+#define PI 3.14159265358979323846264338f
+#define TWO_PI  6.28318530718f
+#define IS_POSITIVE(a) ((a) > TINY)
+#define IS_NEGATIVE(a) ((a) < -TINY)
+#define IS_ZERO(a) (!IS_NEGATIVE(a) && !IS_POSITIVE(a))
+// todo NON_NEGATIVE? NON_POSITIVE?
+#define NON_ZERO(a) (!IS_ZERO(a))
+#define IS_EQUAL(a, b) (ABS((a) - (b)) < TINY)
+#define IN_RANGE(c, a, b) (((a) - TINY < (c)) && ((c) < (b) + TINY))
+#define NOT_EQUAL(a, b) (!IS_EQUAL((a), (b)))
+#define IS_EVEN(a) ((a) % 2 == 0)
+#define IS_ODD(a) (!IS_EVEN(a))
+#define IS_DIVISIBLE_BY(a, b) (int(a) % int(b) == 0)
+#define NOT_DIVISIBLE_BY(a, b) (!IS_DIVISIBLE_BY((a), (b)))
+#define IDBBNETZ(a, b) (((a) == 0) ? false : IS_DIVISIBLE_BY((a), (b))) // isDivisibleByButNotEqualToZero
 
 #define MIAO_COS(f, F, a, b) LERP(.5 - .5 * cos(NUM_DEN(f, F) * TWO_PI), a, b)
 #define MIAO_SIN(f, F, a, b) LERP(.5 + .5 * sin(NUM_DEN(f, F) * TWO_PI), a, b)
@@ -14,11 +84,6 @@ typedef unsigned char byte;
 #include <stdint.h>
 #define u64 uint64_t
 
-#define elif else if
-#define for_(i, N) for (int i = 0; i < (N); ++i)
-#define for____(N) for (int _ = 0; _ < (N); ++_)
-#define stb_for_polygon(i, j, N_ij) for (int i = N_ij - 1, j = 0; j < N_ij; i = j, ++j)
-
 #define RAND(a, b) LERP(real(rand()) / RAND_MAX, a, b)
 
 #include <stdio.h>
@@ -29,18 +94,8 @@ typedef unsigned char byte;
 #define NUM_DENm1(f, F) (real(f) / ((F) - 1))
 #define NUMp1_DEN(f, F) (real((f) + 1) / (F))
 
-#define NITEMS(x) (sizeof(x) / sizeof(x[0]))
-
-#define SWAP(a, b) do {                   \
-    ASSERT(sizeof(a) == sizeof(b));       \
-    void *__SWAP_tmp = malloc(sizeof(a)); \
-    memcpy(__SWAP_tmp, &a, sizeof(a));    \
-    memcpy(&a, &b, sizeof(b));            \
-    memcpy(&b, __SWAP_tmp, sizeof(b));    \
-} while (0)
 
 
-#pragma region stb_ds
 /* hack to inspect array in debugger:
  points,*((int*)(points)-8)
  */
@@ -67,7 +122,8 @@ template <typename T> T *poe_arr2raw(T *dyn) {
     arrfree(dyn);
     return raw;
 }
-#pragma endregion
+
+
 
 struct qsortHelperStruct {
     int index;
@@ -93,51 +149,6 @@ void poe_sort_against(void *base, int nitems, int size, real *corresp_values_to_
 }
 
 
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define MID(a, b, c) MAX(MIN((a), (b)), MIN(MAX((a), (b)), (c)))
-
-#define SGN(a) ((a) > 0 ? 1 : -1)
-#define AVG(a, b) (.5 * (a) + .5 * (b))
-#define ABS(x) ((x) < 0 ? -(x) : (x))
-#define LERP(t, a, b) ((1 - (t)) * (a) + (t) * (b))
-#define CLAMP(t, a, b) MIN(MAX(t, a), b)
-#define MAG_CLAMP(t, a) CLAMP(t, -(a), a)
-// #define CLAMPED_LERP(t, a, b) LERP(CLAMP(t, 0, 1), a, b)
-#define INVERSE_LERP(p, a, b) (((p) - (a)) / ((b) - (a)))
-
-// #define MAG_CLAMP(x, a) (SGN(x) * MIN(a, ABS(x)))
-
-#define NOR(a, b) (!(a) && !(b))
-#define XOR(a, b) (((a) && !(b)) || (!(a) && (b)))
-
-#define RAD(a) ((a) * PI / 180)
-#define DEG(a) ((a) * 180 / PI)
-
-#define TINY 1e-7
-#define BIG 1e5
-#define PI 3.14159265358979323846264338f
-#define TWO_PI  6.28318530718f
-#define IS_POSITIVE(a) ((a) > TINY)
-#define IS_NEGATIVE(a) ((a) < -TINY)
-#define IS_ZERO(a) (!IS_NEGATIVE(a) && !IS_POSITIVE(a))
-// todo NON_NEGATIVE? NON_POSITIVE?
-#define NON_ZERO(a) (!IS_ZERO(a))
-#define IS_EQUAL(a, b) (ABS((a) - (b)) < TINY)
-#define IN_RANGE(c, a, b) (((a) - TINY < (c)) && ((c) < (b) + TINY))
-#define NOT_EQUAL(a, b) (!IS_EQUAL((a), (b)))
-#define IS_EVEN(a) ((a) % 2 == 0)
-#define IS_ODD(a) (!IS_EVEN(a))
-#define IS_DIVISIBLE_BY(a, b) (int(a) % int(b) == 0)
-#define NOT_DIVISIBLE_BY(a, b) (!IS_DIVISIBLE_BY((a), (b)))
-#define IDBBNETZ(a, b) (((a) == 0) ? false : IS_DIVISIBLE_BY((a), (b))) // isDivisibleByButNotEqualToZero
-
-#define ASSERT(b) if (!(b)) { \
-    printf("ASSERT Line %d in %s \n", __LINE__, __FILE__); \
-    *((volatile int *) 0) = 0;                              \
-}
-#define STATIC_ASSERT(b) static_assert(b, "STATIC_ASSERT")
-
 #define CONCAT_(a, b) a ## b
 #define CONCAT(a, b) CONCAT_(a, b)
 #define UNIQUE_VARIABLE_NAME CONCAT(_VAR_, __COUNTER__)
@@ -152,7 +163,6 @@ bool notSetTrueButReturnOriginalValue(bool &b) { bool ret = !b; b = true; return
 #define for_inclusiveRange(i, a, b) for (int i = int(a); i <= int(b); ++i)
 #define for_inclusiveRange_mp(i, a) for_inclusiveRange(i, -(a), a)
 #define for_sign(i) for (int i = -1; i <= 1; i += 2)
-
 
 #define Kilobytes(Value) (          Value *1024LL)
 #define Megabytes(Value) (Kilobytes(Value)*1024LL)

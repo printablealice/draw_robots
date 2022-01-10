@@ -1,3 +1,5 @@
+// #define ASSERT_WAITS_FOR_YOU_TO_PRESS_ENTER_BEFORE_CRASHING
+
 #include "draw_robots.cpp"
 
 void hello_c() { // note: step through this app with a debugger
@@ -48,6 +50,7 @@ void hello_c() { // note: step through this app with a debugger
         }
     }
 }
+
 void hello_linalg() {
     {
         real d = 3.14;
@@ -84,6 +87,8 @@ void hello_linalg() {
 
 
 
+
+
 void hello_triangle() {
     // // this is an app that uses app.cpp (my particular way of doing an app)
     // // it's just a function (with a big ol' while loop) that we call from main
@@ -104,8 +109,7 @@ void hello_triangle() {
     //              there is nothing hard about any of it
     //              and if you don't want to use glfw and/or OpenGL, you could e.g. call the Windows API directly and render on the CPU (see Handmade Hero)
 
-    // // my main goal in this class is to open your eyes a bit to what's possible
-    // // and have you start to question some of the things you've heard/been taught
+    // ASSERT(2 + 2 == 5); // use this to confirm ASSERT is behaving as you want it to
 
     vec2 points[] = { { 0, 0 }, { 1, 0 }, { 0, 1 } }; // the points we'll draw
     vec3 colors[] = { RED, GREEN, BLUE };             // the colors we'll draw them in
@@ -128,6 +132,7 @@ void hello_triangle() {
         SWAP_DRAW_BUFFERS();      // swap the buffers (display what we just drew) -- END_FRAME() is an alias for this
     }
 }
+
 void hello_triangle_more_as_i_would_actually_write_it() {
     vec2 points[] = { { 0, 0 }, { 1, 0 }, { 0, 1 } };
     vec3 colors[] = { RED, GREEN, BLUE };
@@ -144,6 +149,8 @@ void hello_triangle_more_as_i_would_actually_write_it() {
 
 
 
+
+
 void hello_balls() {
     const int NUM_BALLS = 20; // alternative: #define NUM_BALLS 20
 
@@ -156,18 +163,18 @@ void hello_balls() {
         static bool initialized;
         if (!initialized || KEY_PRESSED['R']) {
             initialized = true;
-            for_(i, NUM_BALLS) {
+            for (int i = 0; i < NUM_BALLS; ++i) {
                 s[i] = {};
-                for_(d, 2) {
+                for (int d = 0; d < 2; ++d) {
                     v[i][d] = .01 * RAND(-1, 1);
                 }
             }
         }
 
         if (!KEY_TOGGLE['P'] || KEY_PRESSED['.']) {
-            for_(i, NUM_BALLS) {
+            for (int i = 0; i < NUM_BALLS; ++i) {
                 s[i] += v[i];
-                for_(d, 2) {
+                for (int d = 0; d < 2; ++d) {
                     if (ABS(s[i][d]) > 1) {
                         s[i][d] = SGN(s[i][d]) * (1 - (ABS(s[i][d]) - 1));
                         v[i][d] *= -1;
@@ -176,13 +183,14 @@ void hello_balls() {
             }
         }
 
-        KELLY_DRAW_(2, POINTS, NUM_BALLS, s, 4);
+        KELLY_DRAW_(2, POINTS, NUM_BALLS, s, 9);
         real tmp[] = { -1, -1, 1, -1, 1, 1, -1, 1 };
         DRAW_(2, LINE_LOOP, NITEMS(tmp) / 2, tmp, WHITE, 1);
 
         END_FRAME();
     }
 }
+
 #define DIM 3 // 2 for 2D app; 3 for 3D app
 #if DIM == 2
 #define vecX vec2
@@ -252,6 +260,8 @@ void hello_balls_plus_plus() {
 
 
 
+
+
 void hello_pencil() {
     // note: this pattern is a bit silly, but is verrrry convenient in practice
     vec2 **line_strips = 0; // ~ std::vector<std::vector<vec2>>
@@ -260,7 +270,7 @@ void hello_pencil() {
         BEGIN_FRAME(PV, 3, 'F', BLACK);
 
         if (KEY_PRESSED['R']) {
-            for_(i, arrlen(line_strips)) arrfree(line_strips[i]);
+            for (int i = 0; i < arrlen(line_strips); ++i) arrfree(line_strips[i]);
             arrfree(line_strips);
         }
 
@@ -272,13 +282,14 @@ void hello_pencil() {
             arrput(line_strips[arrlen(line_strips) - 1], MOUSE_POSITION);
         }
 
-        for_(i, arrlen(line_strips)) {
+        for (int i = 0; i < arrlen(line_strips); ++i) {
             DRAW_(2, LINE_STRIP, arrlen(line_strips[i]), line_strips[i], monokai(i));
         }
 
         END_FRAME();
     }
 }
+
 void hello_pencil_another_way() {
     // store all the strokes contiguously
     vec2 *vertices = 0;
@@ -302,7 +313,7 @@ void hello_pencil_another_way() {
         }
 
         int offset = 0;
-        for_(i, arrlen(vertex_count)) {
+        for (int i = 0; i < arrlen(vertex_count); ++i) {
             DRAW_(2, LINE_STRIP, vertex_count[i], vertices + offset, monokai(i));
             offset += vertex_count[i];
         }
@@ -310,6 +321,7 @@ void hello_pencil_another_way() {
         END_FRAME();
     }
 }
+
 #if 0
 #include <vector>
 void hello_pencil_with_std_vector() {
@@ -354,8 +366,9 @@ void hello_pencil_with_std_vector() {
         BEGIN_FRAME(PV, 3, 'F', BLACK);
 
         if (KEY_PRESSED['R']) {
-            for_(i, line_strips.size()) 
+            for (int i = 0; i < line_strips.size(); ++i) {
                 line_strips.clear();
+            }
         }
 
         if (MOUSE_LEFT_PRESSED) {
@@ -366,7 +379,7 @@ void hello_pencil_with_std_vector() {
             line_strips[line_strips.size() - 1].push_back(MOUSE_POSITION);
         }
 
-        for_(i, line_strips.size()) {
+        for (int i = 0; i < line_strips.size(); ++i) {
             DRAW_(2, LINE_STRIP, (int) line_strips[i].size(), line_strips[i].data(), monokai(i));
         }
 
@@ -374,6 +387,8 @@ void hello_pencil_with_std_vector() {
     }
 }
 #endif
+
+
 
 
 
@@ -421,6 +436,7 @@ void app_draw() {
         END_FRAME();
     }
 }
+
 void app_draw_plus_plus() {
     vec3 rainbow[] = { RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE };
     int primitives[] = { POINTS, LINES, TRIANGLES, QUADS, LINE_STRIP, LINE_LOOP, TRIANGLE_FAN };
@@ -455,6 +471,9 @@ void app_draw_plus_plus() {
         END_FRAME();
     }
 }
+
+
+
 
 
 int main() {
