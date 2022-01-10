@@ -1,4 +1,5 @@
 // #define ASSERT_WAITS_FOR_YOU_TO_PRESS_ENTER_BEFORE_CRASHING
+// #define MAC_I_CANT_DRAG_THE_TRIANGLE
 
 #include "draw_robots.cpp"
 
@@ -726,13 +727,13 @@ int main() {
     // hello_c();
     // hello_linalg();
 
-    hello_triangle();
+    // hello_triangle();
     // hello_triangle_more_as_i_would_actually_write_it();
 
     // hello_balls();
     // hello_balls_plus_plus();
 
-    // hello_pencil();
+    hello_pencil();
     // hello_pencil_another_way();
     // hello_pencil_with_std_vector();
 

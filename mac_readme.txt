@@ -20,3 +20,21 @@ install glfw
 build and run
 -------------
 > sh mac_build.sh && ./a.out
+
+================================================================
+if you get error: ld: symbol(s) not found for architecture arm64
+================================================================
+
+remove glfw and build/install from source
+-----------------------------------------
+> brew uninstall glfw
+> git clone https://github.com/glfw/glfw.git
+> cd glfw
+> cmake -DCMAKE_OSX_ARCHITECTURES=arm64 .
+> make
+> sudo make install
+
+build and run
+-------------
+> sh mac_build_special.sh && ./a.out
+

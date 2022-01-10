@@ -253,7 +253,11 @@ vec2 _MOUSE_POSITION_OFFSET_Screen;
 vec2 MOUSE_POSITION_OFFSET;
 static void cursor_position_callback(GLFWwindow *, double xpos, double ypos) {
     vec2 tmp = _MOUSE_POSITION_Screen;
+    #ifndef MAC_I_CANT_DRAG_THE_TRIANGLE
     _MOUSE_POSITION_Screen = { xpos, ypos };
+    #else
+    _MOUSE_POSITION_Screen = 2 * V2(xpos, ypos);
+    #endif
     _MOUSE_POSITION_OFFSET_Screen = _MOUSE_POSITION_Screen - tmp; 
     _MOUSE_POSITION_NDC = transformPoint(get_NDC_from_Screen(), _MOUSE_POSITION_Screen);
 }
