@@ -28,6 +28,25 @@ void hello_c() { // note: step through this app with a debugger
         }
     }
 
+    { // pointers + pointer arithmetic
+        char foo[] = { 'a', 'b', 'c', 'd', 'e' };
+
+        char *tmp = foo;
+        tmp += 2;
+        char a = *tmp;
+
+        char b = *(foo + 2);
+
+        char c = foo[2];
+
+        printf("%c %c %c\n", a, b, c); 
+
+        for (char *ptr = foo; ptr < foo + 5; ++ptr) { // totally ok (but maybe a bit odd) to use a ptr as the variable in a for loop
+            printf("%c ", *ptr); 
+        }
+        printf("\n");
+    }
+
     { // static variables
         // static variables are "locally persistent"
         for (int i = 0; i < 5; ++i) {
@@ -49,6 +68,10 @@ void hello_c() { // note: step through this app with a debugger
             }
         }
     }
+
+
+    printf("press Enter to quit\n");
+    getchar();
 }
 
 void hello_linalg() {
@@ -477,10 +500,10 @@ void app_draw_plus_plus() {
 
 
 int main() {
-    // hello_c();
+    hello_c();
     // hello_linalg();
 
-    hello_triangle();
+    // hello_triangle();
     // hello_triangle_more_as_i_would_actually_write_it();
 
     // hello_balls();
