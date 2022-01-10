@@ -8,7 +8,7 @@
 #include "poe.cpp"
 #include "linalg.cpp"
 
-#ifdef WIN32 // Windows: glad and glfw
+#ifdef _WIN64 // Windows: glad and glfw
 #define GLFW_INCLUDE_NONE
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include "windows_ext/glfw/include/GLFW/glfw3.h"
@@ -71,9 +71,11 @@ BEGIN_PREMAIN_BLOCK {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    #ifndef WIN32
+
+    #ifndef _WIN64
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     #endif
+
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     window = glfwCreateWindow(1024, 512, "", NULL, NULL);
     glfwSetWindowPos(window, 0, 30);
@@ -82,7 +84,7 @@ BEGIN_PREMAIN_BLOCK {
     glfwSetWindowTitle(window, "poe");
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    #ifdef WIN32
+    #ifdef _WIN64
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     #endif
 

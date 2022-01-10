@@ -1,5 +1,9 @@
 https://gist.github.com/v3n/27e810ac744b076ceeb7
 
+make sure WIN32 not defined
+---------------------------
+comment out the first line of main.cpp
+
 open terminal
 -------------
 right click draw_robots folder and click New Terminal at Folder

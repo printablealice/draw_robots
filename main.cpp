@@ -1,4 +1,3 @@
-#define WIN32 // comment this line out if on Mac
 #include "draw_robots.cpp"
 
 void hello_c() { // note: step through this app with a debugger
