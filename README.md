@@ -1,6 +1,6 @@
 # draw_robots
 
-Code > Download ZIP
+Either clone or Code > Download ZIP
 
 Windows only: Right click the .zip file you downloaded > Properties > Unblock > OK
 
