@@ -1,5 +1,6 @@
 # draw_robots
 
+
 ## step 1: get code
 
 *goal: have a folder named draw_robots (with all the files in it) sitting on your Desktop*
@@ -11,7 +12,9 @@
 
     __Windows Only: before extracting right click .zip file > Properties > Unblock > OK__
 
+
 ## step 2 (Windows): build and run
+
 _note: to unblock a file (if you didn't unblock the zip before extracting) right click the file, select Properties, check Unblock, click OK_
 
 - install the c++ build tools (https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022) __!! make sure to check the box for Desktop Development with C++__
@@ -23,7 +26,9 @@ _note: to unblock a file (if you didn't unblock the zip before extracting) right
 
 __! if step 2 fails please post in Issues__
 
+
 ## step 2 (Mac): build and run
+
 - open terminal (right click draw_robots folder and click New Terminal at Folder)
 - install dev tools (if you get some message from clang you already have them)
     > cc
@@ -36,7 +41,9 @@ __! if step 2 fails please post in Issues__
 
 __! if step 2 fails with error like "ld: symbol(s) not found for architecture arm64" please see below__
 
+
 ## step 2s (Mac; if step 2 failed): alternate build and run
+
 - remove glfw; build glfw from source; install glfw
     > brew uninstall glfw
     > 
