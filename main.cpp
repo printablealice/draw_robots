@@ -76,8 +76,8 @@ void hello_c() { // note: step through this app with a debugger
 
 void hello_linalg() {
     {
-        real d = 3.14;
-        d = CLAMP(d, 0, 1); // macros that work on real's: CLAMP, LERP, AVG, MIN, MAX, MID, ABS, etc.
+        double d = 3.14;
+        d = CLAMP(d, 0, 1); // macros that work on double's: CLAMP, LERP, AVG, MIN, MAX, MID, ABS, etc.
     }
 
     {
@@ -207,7 +207,7 @@ void hello_balls() {
         }
 
         KELLY_DRAW_(2, POINTS, NUM_BALLS, s, 9);
-        real tmp[] = { -1, -1, 1, -1, 1, 1, -1, 1 };
+        double tmp[] = { -1, -1, 1, -1, 1, 1, -1, 1 };
         DRAW_(2, LINE_LOOP, NITEMS(tmp) / 2, tmp, WHITE, 1);
 
         END_FRAME();
@@ -268,10 +268,10 @@ void hello_balls_plus_plus() {
         free(colors);
 
         #if DIM == 2
-        real tmp[] = { -1, -1, 1, -1, 1, 1, -1, 1 };
+        double tmp[] = { -1, -1, 1, -1, 1, 1, -1, 1 };
         DRAW_(DIM, LINE_LOOP, NITEMS(tmp) / 2, tmp, WHITE, 1);
         #else
-        real tmp[] = { -1,-1,-1,-1,1,-1,-1,1,-1,1,1,-1,1,1,-1,1,-1,-1,1,-1,-1,-1,-1,-1,-1,-1,1,-1,1,1,-1,1,1,1,1,1,1,1,1,1,-1,1,1,-1,1,-1,-1,1,-1,-1,-1,-1,-1,1,-1,1,-1,-1,1,1,1,1,-1,1,1,1,1,-1,-1,1,-1,1 };
+        double tmp[] = { -1,-1,-1,-1,1,-1,-1,1,-1,1,1,-1,1,1,-1,1,-1,-1,1,-1,-1,-1,-1,-1,-1,-1,1,-1,1,1,-1,1,1,1,1,1,1,1,1,1,-1,1,1,-1,1,-1,-1,1,-1,-1,-1,-1,-1,1,-1,1,-1,-1,1,1,1,1,-1,1,1,1,1,-1,-1,1,-1,1 };
         DRAW_(DIM, LINES, NITEMS(tmp) / 3, tmp, WHITE, 1);
         #endif
 
@@ -372,8 +372,8 @@ void hello_pencil_with_std_vector() {
     };
     #endif
     // things to consider (in my opinion):
-    // - stuff gets real hard to look at in a debugger
-    // - compile errors get real hard to understand
+    // - stuff gets double hard to look at in a debugger
+    // - compile errors get double hard to understand
     // - i no longer understand what's going on with the actual memory
     // -- (something something references, move semantics, constructors, destructors, etc.)
     //                         ^ ---------- i try to avoid most of this stuff ---------- ^
@@ -429,7 +429,7 @@ void app_draw() {
         if (!initialized || KEY_PRESSED['R']) {
             initialized = true;
             for (int i = 0; i < num_points; ++i) {
-                real theta = double(i) / num_points * 6.18; // note: what happens if you don't cast i to double? why?
+                double theta = double(i) / num_points * 6.18; // note: what happens if you don't cast i to double? why?
                 points[i] = { cos(theta), sin(theta) };     // todo: #define PI 3.14159265358979323846264338f
                 //       #define TWO_PI (2 * PI)
                 colors[i] = AVG(monokai(i / 2), monokai((i + 1) / 2)); // monokai(i) just looks up in { RED, ORANGE, ..., PURPLE }
@@ -469,7 +469,7 @@ void app_draw_plus_plus() {
     vec2 *points = (vec2 *) malloc(num_points * sizeof(vec2));
     vec3 *colors = (vec3 *) malloc(num_points * sizeof(vec3));
     for (int i = 0; i < num_points; ++i) {
-        real x = double(i) / num_points;
+        double x = double(i) / num_points;
         points[i] = { x, 0 };
         colors[i] = rainbow[i % NITEMS(rainbow)];
     }
@@ -497,13 +497,236 @@ void app_draw_plus_plus() {
 
 
 
+void app_fk_2d() {
+    const int NUM_LINKS = 4;
+    double L[] = { 1, 2, 3, 1 };
+    double theta[] = { 0, 0, 0, 0 };
+
+    while (!KEY_PRESSED['Q']) {
+        BEGIN_FRAME(PV, 15, 'F', BLACK);
+
+        static vec2 drag_points[NUM_LINKS];
+        KELLY_DRAW_(2, POINTS, NUM_LINKS, drag_points);
+        DRAG_2D_POINTS_(PV, NUM_LINKS, drag_points, WHITE);
+        for_(i, NUM_LINKS) {
+            drag_points[i].x = -3 - i;
+            theta[i] = drag_points[i].y;
+        }
+
+        vec2 joint_positions[NUM_LINKS + 1] = {};
+        double cumm_angle = 0;
+        for_(i, NUM_LINKS) {
+            cumm_angle += theta[i];
+            joint_positions[i + 1] = joint_positions[i] + L[i] * V2(cos(cumm_angle), sin(cumm_angle));
+        }
+        DRAW_(2, LINE_STRIP, NUM_LINKS + 1, joint_positions, GRAY);
+        KELLY_DRAW_(2, POINTS, NUM_LINKS, joint_positions);
+
+        END_FRAME();
+    }
+}
+void app_fk_3d() {
+    // a .1x1x.1 axis-aligned box with bottommost face centered at the origin
+    vec3 link_vertices[]={{-.1,1,.1},{-.1,0,.1},{-.1,0,-.1},{-.1,1,-.1},{.1,1,.1},{.1,0,.1},{.1,0,-.1},{.1,1,-.1},{.1,0,.1},{-.1,0,.1},{-.1,0,-.1},{.1,0,-.1},{.1,1,.1},{-.1,1,.1},{-.1,1,-.1},{.1,1,-.1},{.1,1,-.1},{-.1,1,-.1},{-.1,0,-.1},{.1,0,-.1},{.1,1,.1},{-.1,1,.1},{-.1,0,.1},{.1,0,.1}};
+    vec3 link_colors[] = {YELLOW,YELLOW,YELLOW,YELLOW,PURPLE,PURPLE,PURPLE,PURPLE,RED,RED,RED,RED,GREEN,GREEN,GREEN,GREEN,ORANGE,ORANGE,ORANGE,ORANGE,BLUE,BLUE,BLUE,BLUE};
+
+    const int NUM_LINKS = 5;
+    double L[]         = { 1.5, 1, 1, .5, .5 };
+    int joint_axes[] = { 1, 2, 0, 2, 1 }; // 0 is a joint that rotates about x axis, 1 - y axis, 2 - z axis
+    double theta[]     = { 0, 0, 0, 0, 0 };
+
+    while (!KEY_PRESSED['Q']) {
+        BEGIN_FRAME(PV, 10, 'F', BLACK);
+
+        static vec2 drag_points[NUM_LINKS];
+        KELLY_DRAW_(2, POINTS, NUM_LINKS, drag_points);
+        bool __MOUSE_HANDLED = DRAG_2D_POINTS_(PV, NUM_LINKS, drag_points, WHITE);
+        for_(i, NUM_LINKS) {
+            drag_points[i].x = -3 - i;
+            theta[i] = drag_points[i].y;
+        }
+
+        vec3 joint_positions[NUM_LINKS + 1] = {};
+        mat4 joint_orientations[NUM_LINKS + 1] = {};
+        for_(i, NUM_LINKS) {
+            mat4 R = (joint_axes[i] == 0) ? RotationX(theta[i]) : (joint_axes[i] == 1) ? RotationY(theta[i]) : RotationZ(theta[i]);
+            joint_orientations[i] = (i == 0) ? Identity<4>() : joint_orientations[i - 1];
+            joint_orientations[i] = joint_orientations[i] * R;
+            joint_positions[i + 1] = joint_positions[i] + transformVector(joint_orientations[i], V3(0, L[i], 0));
+        }
+
+        CAMERA_3D(PV_3D, 10, __MOUSE_HANDLED, 'C'); // note: left mouse drag rotates 3D camera iff not already handled (by DRAG_2D_POINTS_)
+
+        { // draw robot
+            if (KEY_TOGGLE[GLFW_KEY_TAB]) { // as skeleton
+                DRAW_(3, LINE_STRIP, NUM_LINKS + 1, joint_positions, GRAY);
+                KELLY_DRAW_(3, POINTS, NUM_LINKS, joint_positions);
+            } else { // as boxes
+                if (1) { // option 1: same vertices different camera
+                    for_(i, NUM_LINKS) {
+                        mat4 M = Translation(joint_positions[i]) * joint_orientations[i] * Scaling(1, L[i], 1);
+                        SET_DRAW_TRANSFORM(PV_3D * M);
+                        DRAW_(3, QUADS, NITEMS(link_vertices), link_vertices, link_colors);
+                        glPolygonMode(GL_FRONT_AND_BACK,  GL_LINE);
+                        DRAW_(3, QUADS, NITEMS(link_vertices), link_vertices, WHITE, 2);
+                        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                    }
+                    SET_DRAW_TRANSFORM(PV_3D);
+                } else { // option 2: actually move all the vertices (and leave the camera as is)
+                    ASSERT(NITEMS(link_vertices) == 24);
+                    vec3 *vertices = (vec3 *) malloc(NUM_LINKS * 24 * sizeof(vec3));
+                    vec3 *colors = (vec3 *) malloc(NUM_LINKS * 24 * sizeof(vec3));
+                    int k = 0;
+                    for_(i, NUM_LINKS) {
+                        mat4 M = Translation(joint_positions[i]) * joint_orientations[i] * Scaling(1, L[i], 1);
+                        for_(j, 24) {
+                            vertices[k] = transformPoint(M, link_vertices[j]); // fornow
+                            colors[k] = link_colors[j];
+                            ++k;
+                        }
+                    }
+                    DRAW_(3, QUADS, NUM_LINKS * 24, vertices, colors);
+                    glPolygonMode(GL_FRONT_AND_BACK,  GL_LINE);
+                    DRAW_(3, QUADS, NUM_LINKS * 24, vertices, WHITE);
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                }
+            }
+        }
+
+        { // draw axes
+            vec3 vertices[2 * NUM_LINKS] = {};
+            vec3 colors[2 * NUM_LINKS] = {};
+            for_(i, NUM_LINKS) {
+                vec3 axis = {};
+                axis[joint_axes[i]] = .5;
+                vertices[2 * i    ] = joint_positions[i];
+                vertices[2 * i + 1] = joint_positions[i] + transformVector(joint_orientations[i], axis);
+                colors[2 * i] = colors[2 * i + 1] = kelly(i);
+            }
+            DRAW_(3, LINES, NITEMS(vertices), vertices, colors, 5);
+        }
+
+        { // draw ground
+            double tmp[] = { 1, 0, 1, 1, 0, -1, -1, 0, -1, -1, 0, 1 };
+            DRAW_(3, QUADS, NITEMS(tmp) / 3, tmp, AVG(WHITE, GRAY));
+        }
+
+        END_FRAME();
+    }
+}
+
+void app_ik_2d() {
+    #define NUM_LINKS 5
+    double L[] = { 1, 2, 3, 1, 1 };
+    vec2 target = { 5, 5 };
+
+    auto get_x_of_u = [&] (vec2 *x, double *u) { // fk
+        x[0] = {};
+        double cumm_angle = 0;
+        for_(i, NUM_LINKS) {
+            cumm_angle += u[i];
+            x[i + 1] = x[i] + L[i] * V2(cos(cumm_angle), sin(cumm_angle));
+        }
+    };
+
+    auto EVALUATE_AND_ADD_TO = [&] (double *u, double *O, double *O_u) { // ik objective and its gradient (first derivative)
+        vec2 x[NUM_LINKS + 1];
+        get_x_of_u(x, u);
+
+        if (O) {
+            *O += 1e-2 * squaredNorm(x[NUM_LINKS] - target);
+            for_(i, NUM_LINKS) { *O += 1e-4 * pow(u[i], 2) / 2; }
+        }
+
+        if (O_u) { // TODO analytic gradient
+
+        }
+
+    };
+
+    double u[NUM_LINKS] = {};
+
+    while (!KEY_PRESSED['Q']) {
+        BEGIN_FRAME(PV, 15, 'F', BLACK);
+
+        if (KEY_PRESSED['R']) {
+            memset(u, 0, NUM_LINKS * sizeof(double));
+        }
+
+        if (KEY_TOGGLE['S']) { // step of gradient descent with line search
+            double O = 0;
+            double O_u[NUM_LINKS] = {};
+            EVALUATE_AND_ADD_TO(u, &O, O_u);
+            if (1) { // finite difference approximation of the gradient
+                double d = 1e-5;
+                for_(i, NUM_LINKS) {
+                    double right = 0;
+                    double tmp = u[i];
+                    u[i] += d;
+                    EVALUATE_AND_ADD_TO(u, &right, 0);
+                    u[i] = tmp;
+
+                    O_u[i] += (right - O) / (d);
+                }
+            }
+
+            // TODO check gradient with finite differences
+
+            double u_guess[NUM_LINKS]; {
+                double stepSize = 1;
+                int lineSearchIteration = 0;
+                while (1) {
+                    for_(i, NUM_LINKS) { u_guess[i] = u[i] - stepSize * O_u[i]; } // ~ u_guess = u - stepSize * O_u;
+
+                    double O_guess = 0;
+                    EVALUATE_AND_ADD_TO(u_guess, &O_guess, 0);
+
+                    if (O_guess < O || lineSearchIteration++ > 10) {
+                        break;
+                    }
+
+                    stepSize /= 2;
+                }
+            }
+            memcpy(u, u_guess, NUM_LINKS * sizeof(double)); // ~ u = u_guess;
+        }
+
+        { // draw
+            { // draw current joint angle graph
+                vec2 tmp[NUM_LINKS];
+                for_(i, NUM_LINKS) {
+                    tmp[i].x = -3 - i;
+                    tmp[i].y = u[i];
+                }
+                KELLY_DRAW_(2, POINTS, NUM_LINKS, tmp);
+            }
+
+            { // draw robot at x(u)
+                vec2 x[NUM_LINKS + 1] = {};
+                get_x_of_u(x, u);
+                DRAW_(2, LINE_STRIP, NUM_LINKS + 1, x, GRAY);
+                KELLY_DRAW_(2, POINTS, NUM_LINKS, x);
+            }
+
+            DRAW_(2, POINTS, 1, &target, GREEN);
+            DRAG_2D_POINTS_(PV, 1, &target, WHITE);
+        }
+
+        END_FRAME();
+    }
+    #undef NUM_LINKS
+}
+
+
+
+
 
 
 int main() {
-    hello_c();
+    // hello_c();
     // hello_linalg();
 
-    // hello_triangle();
+    hello_triangle();
     // hello_triangle_more_as_i_would_actually_write_it();
 
     // hello_balls();
@@ -515,6 +738,9 @@ int main() {
 
     // app_draw();
     // app_draw_plus_plus();
+
+    // app_fk_3d();
+    // app_ik_2d();
 
     return 0;
 }

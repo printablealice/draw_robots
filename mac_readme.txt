@@ -7,6 +7,7 @@ right click draw_robots folder and click New Terminal at Folder
 install development tools
 -------------------------
 > cc
+note: if you get some message from clang, you already have them!
 
 install brew
 ------------
