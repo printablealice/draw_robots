@@ -454,7 +454,7 @@ int main() {
     // hello_c();
     // hello_linalg();
 
-    // hello_triangle();
+    hello_triangle();
     // hello_triangle_more_as_i_would_actually_write_it();
 
     // hello_balls();
@@ -465,7 +465,7 @@ int main() {
     // hello_pencil_with_std_vector();
 
     // app_draw();
-    app_draw_plus_plus();
+    // app_draw_plus_plus();
 
     return 0;
 }
