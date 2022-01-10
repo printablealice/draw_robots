@@ -58,7 +58,7 @@ __! if step 2 fails with error like "ld: symbol(s) not found for architecture ar
     > sudo make install
 - build and run
     > sh mac_build_special.sh && ./a.out
-- note: you may need to update brew and upgrade packages if step 2s doesn't work either
+- note: you may first need to update brew and upgrade packages to get step 2s to work
     > brew update
     > 
     > brew upgrade
