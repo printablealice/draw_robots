@@ -263,7 +263,7 @@ void hello_balls_plus_plus() {
 
 
 void hello_pencil() {
-    // note: this pattern is a bit silly, but is verrrry convenient in practice
+    // note: this pattern (dynamic array of dynamic arrays) is a bit silly (memory all over the place), but is very convenient in practice
     vec2 **line_strips = 0; // ~ std::vector<std::vector<vec2>>
 
     while (!KEY_PRESSED['Q']) {
@@ -353,7 +353,7 @@ void hello_pencil_with_std_vector() {
     // - compile errors get real hard to understand
     // - i no longer understand what's going on with the actual memory
     // -- (something something references, move semantics, constructors, destructors, etc.)
-    //                         ^ ---------- i basically never use this stuff ----------- ^
+    //                         ^ ---------- i try to avoid most of this stuff ---------- ^
     //     std::vector     stb_ds arr
     // -------------------------------
     //      foo.data() <-> foo
