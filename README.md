@@ -12,3 +12,7 @@ option b: Code > Download ZIP
 - Windows only: Right click the .zip file you downloaded > Properties > Unblock > OK
 
 ## step 2: see the relavent readme for your operating system (Windows or Mac)
+
+- How to install build tools for your OS
+- Mac only: How to install GLFW
+- How to build and run
