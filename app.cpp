@@ -101,7 +101,7 @@ BEGIN_PREMAIN_BLOCK {
 } END_PREMAIN_BLOCK
 
 ////////////////////////////////////////////////////////////////////////////////
-// transforms                                                                 //
+// camera (and transforms)                                                    //
 ////////////////////////////////////////////////////////////////////////////////
 
 mat4 BasicOrthographicProjection(real H) {
@@ -183,8 +183,46 @@ mat4 getPV_Perspective(vec3 WorldCameraPosition, real theta) {
 mat4 get_NDC_from_Screen() {
     vec2 dims = get_window_dimensions();
     return Scaling(2 / dims.x, -2 / dims.y, 1) * Translation(-dims.x / 2, -dims.y / 2, 0);
-
 }
+#define CAMERA_2D(PV, ScreenHeight)                                                                                                       \
+    mat4 PV = {}; {                                                                                                                       \
+        static real ScreenHalfHeightInWorldCoordinates = ScreenHeight / 2.;                                                               \
+        static vec2 CameraPositionInWorldCoordinates;                                                                                     \
+        PV = getPV_Ortho2D(CameraPositionInWorldCoordinates, ScreenHalfHeightInWorldCoordinates);                                         \
+        SET_DRAW_TRANSFORM_AND_BAKE_MOUSE(PV);                                                                                            \
+        if (MOUSE_RIGHT_HELD || (KEY_HELD[GLFW_KEY_SPACE] && MOUSE_LEFT_HELD)) CameraPositionInWorldCoordinates -= MOUSE_POSITION_OFFSET; \
+        elif (NON_ZERO(MOUSE_WHEEL_OFFSET)) {                                                                                             \
+            ScreenHalfHeightInWorldCoordinates -= real(ScreenHeight) / 100 * MOUSE_WHEEL_OFFSET;                                          \
+            ScreenHalfHeightInWorldCoordinates = MAX(ScreenHalfHeightInWorldCoordinates, .001);                                           \
+            vec2 s_mouse_NDC = transformPoint(PV, MOUSE_POSITION);                                                                        \
+            mat4 P_prime = BasicOrthographicProjection(ScreenHalfHeightInWorldCoordinates);                                               \
+            vec2 RHS = transformPoint(inverse(P_prime), s_mouse_NDC);                                                                     \
+            CameraPositionInWorldCoordinates = MOUSE_POSITION - RHS;                                                                      \
+        }                                                                                                                                 \
+        PV = getPV_Ortho2D(CameraPositionInWorldCoordinates, ScreenHalfHeightInWorldCoordinates);                                         \
+        SET_DRAW_TRANSFORM_AND_BAKE_MOUSE(PV);                                                                                            \
+    }
+
+
+#define CAMERA_3D(PV, ScreenHeight, mouseHandled, C)                                                                                           \
+    mat4 PV = {}; {                                                                                                                            \
+        static real H_camera = ScreenHeight / 2.;                                                                                              \
+        static real theta_camera = 25;                                                                                                         \
+        static real euler_X_camera, euler_Y_camera;                                                                                            \
+        if (!mouseHandled && NON_ZERO(MOUSE_WHEEL_OFFSET)) {                                                                                   \
+            H_camera -= MOUSE_WHEEL_OFFSET / 20;                                                                                               \
+            H_camera = MAX(H_camera, .0001);                                                                                                   \
+        }                                                                                                                                      \
+        if (!mouseHandled && MOUSE_LEFT_HELD) {                                                                                                \
+            vec2 tmp = _MOUSE_POSITION_OFFSET_Screen / 100;                                                                                    \
+            euler_Y_camera -= tmp.x;                                                                                                           \
+            euler_X_camera -= tmp.y;                                                                                                           \
+        }                                                                                                                                      \
+        real CameraDistanceFromOrigin = H_camera / tan(RAD(theta_camera));                                                                     \
+        vec3 CameraPosition = transformPoint(RotationY(euler_Y_camera) * RotationX(euler_X_camera), vec3({ 0, 0, CameraDistanceFromOrigin })); \
+        PV = (!KEY_TOGGLE[C]) ? getPV_Perspective(CameraPosition, theta_camera) : getPV_Ortho3D(CameraPosition, H_camera);                     \
+        SET_DRAW_TRANSFORM(PV);                                                                                        \
+    }
 
 ////////////////////////////////////////////////////////////////////////////////
 // keys and mouse                                                             //
@@ -487,49 +525,5 @@ void KELLY_DRAW_(int numDimensions, int GL_PRIMITIVE, int numVertices, void *ver
     DRAW_(numDimensions, GL_PRIMITIVE, numVertices, vertices, colors, size);
     free(colors);
 }
-
-////////////////////////////////////////////////////////////////////////////////
-// camera                                                                     //
-////////////////////////////////////////////////////////////////////////////////
-
-#define CAMERA_2D(PV, ScreenHeight)                                                                                                       \
-    mat4 PV = {}; {                                                                                                                       \
-        static real ScreenHalfHeightInWorldCoordinates = ScreenHeight / 2.;                                                               \
-        static vec2 CameraPositionInWorldCoordinates;                                                                                     \
-        PV = getPV_Ortho2D(CameraPositionInWorldCoordinates, ScreenHalfHeightInWorldCoordinates);                                         \
-        SET_DRAW_TRANSFORM_AND_BAKE_MOUSE(PV);                                                                                            \
-        if (MOUSE_RIGHT_HELD || (KEY_HELD[GLFW_KEY_SPACE] && MOUSE_LEFT_HELD)) CameraPositionInWorldCoordinates -= MOUSE_POSITION_OFFSET; \
-        elif (NON_ZERO(MOUSE_WHEEL_OFFSET)) {                                                                                             \
-            ScreenHalfHeightInWorldCoordinates -= real(ScreenHeight) / 100 * MOUSE_WHEEL_OFFSET;                                          \
-            ScreenHalfHeightInWorldCoordinates = MAX(ScreenHalfHeightInWorldCoordinates, .001);                                           \
-            vec2 s_mouse_NDC = transformPoint(PV, MOUSE_POSITION);                                                                        \
-            mat4 P_prime = BasicOrthographicProjection(ScreenHalfHeightInWorldCoordinates);                                               \
-            vec2 RHS = transformPoint(inverse(P_prime), s_mouse_NDC);                                                                     \
-            CameraPositionInWorldCoordinates = MOUSE_POSITION - RHS;                                                                      \
-        }                                                                                                                                 \
-        PV = getPV_Ortho2D(CameraPositionInWorldCoordinates, ScreenHalfHeightInWorldCoordinates);                                         \
-        SET_DRAW_TRANSFORM_AND_BAKE_MOUSE(PV);                                                                                            \
-    }
-
-
-#define CAMERA_3D(PV, ScreenHeight, mouseHandled, C)                                                                                           \
-    mat4 PV = {}; {                                                                                                                            \
-        static real H_camera = ScreenHeight / 2.;                                                                                              \
-        static real theta_camera = 25;                                                                                                         \
-        static real euler_X_camera, euler_Y_camera;                                                                                            \
-        if (!mouseHandled && NON_ZERO(MOUSE_WHEEL_OFFSET)) {                                                                                   \
-            H_camera -= MOUSE_WHEEL_OFFSET / 20;                                                                                               \
-            H_camera = MAX(H_camera, .0001);                                                                                                   \
-        }                                                                                                                                      \
-        if (!mouseHandled && MOUSE_LEFT_HELD) {                                                                                                \
-            vec2 tmp = _MOUSE_POSITION_OFFSET_Screen / 100;                                                                                    \
-            euler_Y_camera -= tmp.x;                                                                                                           \
-            euler_X_camera -= tmp.y;                                                                                                           \
-        }                                                                                                                                      \
-        real CameraDistanceFromOrigin = H_camera / tan(RAD(theta_camera));                                                                     \
-        vec3 CameraPosition = transformPoint(RotationY(euler_Y_camera) * RotationX(euler_X_camera), vec3({ 0, 0, CameraDistanceFromOrigin })); \
-        PV = (!KEY_TOGGLE[C]) ? getPV_Perspective(CameraPosition, theta_camera) : getPV_Ortho3D(CameraPosition, H_camera);                     \
-        SET_DRAW_TRANSFORM(PV);                                                                                        \
-    }
 
 #endif

@@ -1,7 +1,7 @@
 #include "draw_robots.cpp"
 
 void hello_c() { // note: step through this app with a debugger
-    { // fixed size arrays
+    { // fixed size arrays (stack allocated)
         // additional reading: https://stackoverflow.com/questions/35442414/dynamic-vs-static-array-in-c
 
         int a[5];                     // uninitialized (filled with garbage)
@@ -10,15 +10,23 @@ void hello_c() { // note: step through this app with a debugger
         int d[5] = { 0, 1, 2, };      // padded with zeros
         int e[]  = { 0, 1, 2, };      // fully initialized (size implied)
 
-        for (int i = 0; i < NITEMS(a); ++i) {
+        for (int i = 0; i < 5; ++i) {
             a[i] = i;
             b[i] = 2 * i;
         }
+    }
 
+    { // heap allocated arrays
+        int N = 24;
+        int *a = (int *) malloc(N * sizeof(int));
+        int *b = (int *) calloc(N, sizeof(int));
+        for (int i = 0; i < N; ++i) {
+            a[i] = i;
+            b[i] = 2 * i;
+        }
     }
 
     { // static variables
-
         // static variables are "locally persistent"
         for (int i = 0; i < 5; ++i) {
             static int j = 7;
@@ -38,7 +46,6 @@ void hello_c() { // note: step through this app with a debugger
                 printf("this let's you do things just once inside a loop\n");
             }
         }
-
     }
 }
 void hello_linalg() {
@@ -50,7 +57,7 @@ void hello_linalg() {
     {
         vec2 a = { 1, 2 };           // a vec2 is just a plain old data struct
 
-        // a.x; a[0]; a.data[0];        // some equivalent ways of accessing a.data
+        // a.x; a[0]; a.data[0];     // some equivalent ways of accessing a.data
         // a.y; a[1]; a.data[1];
 
         vec2 b = a + 2 * V2(5, 6);   // V2 is returns a vec2 (kinda sorta a constructor) -- let's you create a vec2 anywhere
@@ -83,7 +90,7 @@ void hello_triangle() {
 
     // features
     // - compiles quickly with a single call to the compiler of your choice
-    // - draws stuff reasonbaly fast (not actually fast, just not ludicrously slow)
+    // - draws stuff reasonably fast (not actually fast, just not ludicrously slow)
     // - draws stuff whenever/wherever you want (i.e we have _not_ given up control over when/where we draw())
     // - supplies some basic interactivity (respond to key presses, move camera with the mouse, drag points around, etc.)
 
@@ -373,7 +380,7 @@ void hello_pencil_with_std_vector() {
 void app_draw() {
     int primitives[] = { POINTS, LINES, TRIANGLES, QUADS, LINE_STRIP, LINE_LOOP, TRIANGLE_FAN }; // note: in modern graphics people basically just use triangles (a line segment is e.g. two skinny triangles) but don't worry about that for now
 
-    int num_points = 12; // note: what happens if you make this bigger than 12? why?
+    int num_points = 12;
     vec2 *points = (vec2 *) malloc(num_points * sizeof(vec2));
     vec3 *colors = (vec3 *) malloc(num_points * sizeof(vec3));
 
