@@ -1,7 +1,8 @@
 # draw_robots
 
-## step 1: get code (goal: have a folder named draw_robots (with all the files in it) sitting on your Desktop)
+## step 1: get code
 
+*goal: have a folder named draw_robots (with all the files in it) sitting on your Desktop*
 
 option a (recommended): clone to desktop
 
@@ -9,10 +10,10 @@ option a (recommended): clone to desktop
 
 option b: Code > Download ZIP
 
-- Windows only: Right click the .zip file you downloaded > Properties > Unblock > OK
+- Windows only: right click the .zip file you downloaded > Properties > Unblock > OK
 
-## step 2: see the relavent readme for your operating system (Windows or Mac)
-Includes info on how to...
-- Install build tools for your OS
+## step 2: open the readme for your operating system
+includes info on how to...
+- install build tools for your OS
 - Mac only: Install GLFW
-- Build and run
+- build and run
