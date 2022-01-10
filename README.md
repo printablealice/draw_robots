@@ -39,10 +39,10 @@ __! if step 2 fails please post in Issues__
 - build and run
     > sh mac_build.sh && ./a.out
 
-__! if step 2 fails with error like "ld: symbol(s) not found for architecture arm64" please see below__
+__! if step 2 fails with error like "ld: symbol(s) not found for architecture arm64" please see below; for other errors please post in Issues__
 
 
-## step 2s (Mac; if step 2 failed): alternate build and run
+## step 2s (Mac; step 2 failed with the arm64 error): alternate build and run
 
 - remove glfw; build glfw from source; install glfw
     > brew uninstall glfw
