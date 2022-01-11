@@ -82,7 +82,7 @@ void hello_linalg() {
     }
 
     {
-        vec2 a = { 1, 2 };           // a vec2 is just a plain old data struct
+        vec2 a = { 1., 2. };           // a vec2 is just a plain old data struct
 
         // a.x; a[0]; a.data[0];     // some equivalent ways of accessing a.data
         // a.y; a[1]; a.data[1];
@@ -142,14 +142,14 @@ void hello_triangle() {
         // glfwSwapInterval(0);   // uncomment this line to run at an uncapped frame rate (otherwise default is 60fps)
         POLL_INPUT();             // grab mouse and keyboard input and store in globals
         CAMERA_2D(PV, 2.5); // macro for a basic interactive 2D camera
-                            // note: creates PV = PerspectiveMatrix * ViewMatrix using initial screen height 2.5
+        // note: creates PV = PerspectiveMatrix * ViewMatrix using initial screen height 2.5
         FULLSCREEN_TOGGLE('F');   // press this key to toggle fullscreen
         CLEAR_DRAW_BUFFER(BLACK); // clear the draw buffer to black
         // BEGIN_FRAME(PV, 2.5, 'F', BLACK); // convenience macro that does the above
 
         if (!KEY_TOGGLE[GLFW_KEY_SPACE]) { // press spacebar to toggle drawing on and off
             DRAW_(2, TRIANGLES, 3, points, colors); // draw 2D triangles using these 3 points in these colors
-            DRAW_(2, LINE_LOOP, 3, points, PURPLE); // draw 2D triangles using these 3 points in these colors
+            DRAW_(2, LINE_LOOP, 3, points, PURPLE); // draw a 2D line loop using these 3 points in purple
             DRAG_2D_POINTS_(PV, 3, points, YELLOW); // drag these three points (and annotate in yellow)
         }
 
@@ -158,8 +158,10 @@ void hello_triangle() {
 }
 
 void hello_triangle_more_as_i_would_actually_write_it() {
-    vec2 points[] = { { 0, 0 }, { 1, 0 }, { 0, 1 } };
-    vec3 colors[] = { RED, GREEN, BLUE };
+    // the data
+    vec2 points[] = { { 0, 0 }, { 1, 0 }, { 0, 1 } }; // vertex positions
+    vec3 colors[] = { RED, GREEN, BLUE };             // vertex colors
+
     while (!KEY_PRESSED['Q']) {
         BEGIN_FRAME(PV, 2.5, 'F', BLACK);
         if (!KEY_TOGGLE[GLFW_KEY_SPACE]) {
@@ -170,6 +172,85 @@ void hello_triangle_more_as_i_would_actually_write_it() {
         END_FRAME();
     }
 }
+
+
+
+
+
+#define NUM_BALLS 1000000
+struct Ball {
+    vec2 position;
+    vec2 velocity;
+    vec3 color;
+
+    void draw() {
+        DrawPoint2D(position, color);
+    }
+
+    void update() {
+        position += .033 * velocity;
+        if (ABS(position.x) > 1) {
+            velocity.x *= -1;
+        }
+        if (ABS(position.y) > 1) {
+            velocity.y *= -1;
+        }
+    }
+};
+void object_oriented_balls() {
+
+    Ball *balls = (Ball *) calloc(NUM_BALLS, sizeof(Ball));
+    for (int i = 0; i < NUM_BALLS; ++i) {
+        balls[i].position = { RAND(-1, 1), RAND(-1, 1) };
+        balls[i].velocity = { RAND(-1, 1), RAND(-1, 1) };
+        balls[i].color = { RAND(0, 1), RAND(0, 1), RAND(0, 1) };
+    }
+
+    while (!KEY_PRESSED['Q']) {
+        BEGIN_FRAME(PV, 2.5, 'F', AVG(RED, BLACK));
+
+        for (int i = 0; i < NUM_BALLS; ++i) {
+            balls[i].update();
+            balls[i].draw();
+        }
+
+        END_FRAME();
+    }
+
+}
+
+
+void data_oriented_balls() {
+    vec2 *positions = (vec2 *) calloc(NUM_BALLS, sizeof(vec2));
+    vec2 *velocities = (vec2 *) calloc(NUM_BALLS, sizeof(vec2));
+    vec3 *colors = (vec3 *) calloc(NUM_BALLS, sizeof(vec3));
+    for (int i = 0; i < NUM_BALLS; ++i) {
+        positions[i] = { RAND(-1, 1), RAND(-1, 1) };
+        velocities[i] = { RAND(-1, 1), RAND(-1, 1) };
+        colors[i] = { RAND(0, 1), RAND(0, 1), RAND(0, 1) };
+    }
+
+    while (!KEY_PRESSED['Q']) {
+        BEGIN_FRAME(PV, 2.5, 'F', AVG(GREEN, BLACK));
+
+        // update
+        for (int i = 0; i < NUM_BALLS; ++i) {
+            positions[i] += .033 * velocities[i];
+            if (ABS(positions[i].x) > 1) {
+                velocities[i].x *= -1;
+            }
+            if (ABS(positions[i].y) > 1) {
+                velocities[i].y *= -1;
+            }
+        }
+
+        // draw
+        DRAW_(2, POINTS, NUM_BALLS, positions, colors);
+
+        END_FRAME();
+    }
+}
+#undef NUM_BALLS
 
 
 
@@ -728,10 +809,13 @@ int main() {
     // hello_c();
     // hello_linalg();
 
-    // hello_triangle();
+    hello_triangle();
     // hello_triangle_more_as_i_would_actually_write_it();
 
-    hello_balls();
+    // object_oriented_balls();
+    // data_oriented_balls();
+
+    // hello_balls();
     // hello_balls_plus_plus();
 
     // hello_pencil();
