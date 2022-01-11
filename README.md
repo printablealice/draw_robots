@@ -35,7 +35,7 @@ __! if step 2 fails please post in Issues__
 - install glfw
     > brew install glfw
 - build and run
-    > sh mac_build.sh && ./a.out
+    > sh mac_build.sh && ./main.app
 
 __! if step 2 fails with error like "ld: symbol(s) not found for architecture arm64" please see below; for other errors please post in Issues__
 
@@ -55,7 +55,7 @@ __! if step 2 fails with error like "ld: symbol(s) not found for architecture ar
     > 
     > sudo make install
 - build and run
-    > sh mac_build_special.sh && ./a.out
+    > sh mac_build_special.sh && ./main.app
 - note: you may first need to update brew and upgrade packages to get step 2s to work
     > brew update
     > 
@@ -71,4 +71,4 @@ __! if step 2s fails please post in Issues__
 
 ### step 3b: debug the executable
 - Windows with Remedy or Visual Studio: https://yakvi.github.io/handmade-hero-notes/html/day1.html#debugginginremedybgorvisualstudio
-- Mac with Xcode (untested; potentially outdated): https://handmade.network/forums/t/2826-mac_osx_debugging_with_xcode_with_a.out_file#13906
+- Mac with Xcode (a.out may not be recognized, but main.app produced by updated mac\_build.sh should be): https://handmade.network/forums/t/2826-mac_osx_debugging_with_xcode_with_a.out_file#13906
