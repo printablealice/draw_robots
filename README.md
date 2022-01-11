@@ -63,9 +63,10 @@ __! if step 2 fails with error like "ld: symbol(s) not found for architecture ar
 
 __! if step 2s fails please post in Issues__
 
-## step 3 debugging
+## step 3: debugging
 
-### step 3a compile in debug mode
+### step 3a: compile in debug mode
 - Windows: you need the flag -Od in windows\_build.sh
 - Mac: you need the flag -g in mac\_build.sh
 
+### step 3b: debug the executable
