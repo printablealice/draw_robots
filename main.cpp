@@ -142,7 +142,7 @@ void hello_triangle() {
         // glfwSwapInterval(0);   // uncomment this line to run at an uncapped frame rate (otherwise default is 60fps)
         POLL_INPUT();             // grab mouse and keyboard input and store in globals
         CAMERA_2D(PV, 2.5); // macro for a basic interactive 2D camera
-        // note: creates PV = PerspectiveMatrix * ViewMatrix using initial screen height 2.5
+                            // note: creates PV = PerspectiveMatrix * ViewMatrix using initial screen height 2.5
         FULLSCREEN_TOGGLE('F');   // press this key to toggle fullscreen
         CLEAR_DRAW_BUFFER(BLACK); // clear the draw buffer to black
         // BEGIN_FRAME(PV, 2.5, 'F', BLACK); // convenience macro that does the above
