@@ -15,8 +15,6 @@
 
 ## step 2 (Windows): build and run
 
-_note: to unblock a file (if you didn't unblock the zip before extracting) right click the file, select Properties, check Unblock, click OK_
-
 - install the c++ build tools (https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022) __!! make sure to check the box for Desktop Development with C++__
 - open x64 Native Tools Command Prompt for VS 2022 (click the windows icon; type x64; press Enter key)
 - navigate to draw_robots folder
