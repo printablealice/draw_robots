@@ -235,6 +235,7 @@ void hello_balls_plus_plus() {
         #else
         CAMERA_3D(PV, 3, false, 'C');
         #endif
+        FULLSCREEN_TOGGLE('F');
 
         static bool initialized;
         if (!initialized || KEY_PRESSED['R']) {
