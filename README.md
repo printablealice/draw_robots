@@ -70,3 +70,5 @@ __! if step 2s fails please post in Issues__
 - Mac: you need the flag -g in mac\_build.sh
 
 ### step 3b: debug the executable
+- Windows with Remedy or Visual Studio: https://yakvi.github.io/handmade-hero-notes/html/day1.html#debugginginremedybgorvisualstudio
+- Mac with XCode (untested): https://handmade.network/forums/t/2826-mac_osx_debugging_with_xcode_with_a.out_file#13906
