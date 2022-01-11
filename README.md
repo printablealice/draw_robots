@@ -17,7 +17,7 @@
 
 - install the c++ build tools (https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022) __!! make sure to check the box for Desktop Development with C++__
 - open x64 Native Tools Command Prompt for VS 2022 (click the windows icon; type x64; press Enter key)
-- navigate to draw_robots folder
+- navigate to draw\_robots folder
     > cd "C:\Users\YOUR_USER_NAME_HERE\Desktop\draw_robots"
 - build and run
     > windows_build.bat && build\main.exe
@@ -27,7 +27,7 @@ __! if step 2 fails please post in Issues__
 
 ## step 2 (Mac): build and run
 
-- open terminal (right click draw_robots folder and click New Terminal at Folder)
+- open terminal (right click draw\_robots folder and click New Terminal at Folder)
 - install dev tools (if you get some message from clang you already have them)
     > cc
 - install brew
@@ -62,3 +62,10 @@ __! if step 2 fails with error like "ld: symbol(s) not found for architecture ar
     > brew upgrade
 
 __! if step 2s fails please post in Issues__
+
+## step 3 debugging
+
+### step 3a compile in debug mode
+- Windows: you need the flag -Od in windows\_build.sh
+- Mac: you need the flag -g in mac\_build.sh
+
