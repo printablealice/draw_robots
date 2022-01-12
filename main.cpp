@@ -157,6 +157,27 @@ void hello_triangle() {
     }
 }
 
+void BASIC_DRAG_POINTS_2D(int num_points, vec2 *points) {
+    static vec2 *dragPoint;
+
+    for (int i = 0; i < num_points; ++i) {
+        if (norm(points[i] - MOUSE_POSITION) < .1) {
+            DRAW_(2, POINTS, 1, points + i, WHITE, 10);
+            if (MOUSE_LEFT_PRESSED) {
+                dragPoint = points + i;
+            }
+        }
+    }
+
+    if (dragPoint && MOUSE_LEFT_HELD) {
+        *dragPoint = MOUSE_POSITION;
+    }
+
+    if (MOUSE_LEFT_RELEASED) {
+        dragPoint = 0;
+    }
+}
+
 void hello_triangle_more_as_i_would_actually_write_it() {
     // the data
     vec2 points[] = { { 0, 0 }, { 1, 0 }, { 0, 1 } }; // vertex positions
@@ -167,7 +188,8 @@ void hello_triangle_more_as_i_would_actually_write_it() {
         if (!KEY_TOGGLE[GLFW_KEY_SPACE]) {
             DRAW_(2, TRIANGLES, 3, points, colors);
             DRAW_(2, LINE_LOOP, 3, points, PURPLE);
-            DRAG_2D_POINTS_(PV, 3, points, YELLOW);
+            // DRAG_2D_POINTS_(PV, 3, points, YELLOW);
+            BASIC_DRAG_POINTS_2D(3, points);
         }
         END_FRAME();
     }
@@ -177,7 +199,8 @@ void hello_triangle_more_as_i_would_actually_write_it() {
 
 
 
-#define NUM_BALLS 1000000
+// balls apps we wrote in class
+#define NUM_BALLS 10000
 struct Ball {
     vec2 position;
     vec2 velocity;
@@ -218,8 +241,6 @@ void object_oriented_balls() {
     }
 
 }
-
-
 void data_oriented_balls() {
     vec2 *positions = (vec2 *) calloc(NUM_BALLS, sizeof(vec2));
     vec2 *velocities = (vec2 *) calloc(NUM_BALLS, sizeof(vec2));
@@ -250,6 +271,48 @@ void data_oriented_balls() {
         END_FRAME();
     }
 }
+
+#define DIM 3
+#define vecX Vec<DIM>
+
+void XD_data_oriented_balls() {
+    vecX *positions = (vecX *) calloc(NUM_BALLS, sizeof(vecX));
+    vecX *velocities = (vecX *) calloc(NUM_BALLS, sizeof(vecX));
+
+    vec3 *colors = (vec3 *) calloc(NUM_BALLS, sizeof(vec3));
+    for (int i = 0; i < NUM_BALLS; ++i) {
+        for (int d = 0; d < DIM; ++d) {
+            positions[i][d] = RAND(-1, 1);
+            velocities[i][d] = RAND(-1, 1);
+        }
+
+        colors[i] = { RAND(0, 1), RAND(0, 1), RAND(0, 1) };
+    }
+
+    while (!KEY_PRESSED['Q']) {
+        POLL_INPUT();
+        // false means you can use the mouse to move the camera
+        // 'C' can be used to toggle between orthographic and perspective views
+        CAMERA_3D(PV, 2.5, false, 'C');
+        FULLSCREEN_TOGGLE('F');
+        CLEAR_DRAW_BUFFER(BLACK);
+
+        for (int i = 0; i < NUM_BALLS; ++i) {
+            positions[i] += .01 * velocities[i];
+            for (int d = 0; d < DIM; ++d) {
+                if (ABS(positions[i][d]) > 1) {
+                    velocities[i][d] *= -1;
+                }
+            }
+        }
+
+        DRAW_(DIM, POINTS, NUM_BALLS, positions, colors, 3.0);
+
+        END_FRAME();
+    }
+}
+#undef vecX
+#undef DIM
 #undef NUM_BALLS
 
 
@@ -361,8 +424,8 @@ void hello_balls_plus_plus() {
         END_FRAME();
     }
 }
-#undef DIM
 #undef vecX
+#undef DIM
 
 
 
@@ -501,7 +564,7 @@ void hello_pencil_with_std_vector() {
 void app_draw() {
     int primitives[] = { POINTS, LINES, TRIANGLES, QUADS, LINE_STRIP, LINE_LOOP, TRIANGLE_FAN }; // note: in modern graphics people basically just use triangles (a line segment is e.g. two skinny triangles) but don't worry about that for now
 
-    int num_points = 12;
+    int num_points = 5;
     vec2 *points = (vec2 *) malloc(num_points * sizeof(vec2));
     vec3 *colors = (vec3 *) malloc(num_points * sizeof(vec3));
 
@@ -584,10 +647,8 @@ void app_fk_2d() {
     const int NUM_LINKS = 4;
     double L[] = { 1, 2, 3, 1 };
     double theta[] = { 0, 0, 0, 0 };
-
     while (!KEY_PRESSED['Q']) {
         BEGIN_FRAME(PV, 15, 'F', BLACK);
-
         static vec2 drag_points[NUM_LINKS];
         KELLY_DRAW_(2, POINTS, NUM_LINKS, drag_points);
         DRAG_2D_POINTS_(PV, NUM_LINKS, drag_points, WHITE);
@@ -595,7 +656,6 @@ void app_fk_2d() {
             drag_points[i].x = -3 - i;
             theta[i] = drag_points[i].y;
         }
-
         vec2 joint_positions[NUM_LINKS + 1] = {};
         double cumm_angle = 0;
         for_(i, NUM_LINKS) {
@@ -604,7 +664,6 @@ void app_fk_2d() {
         }
         DRAW_(2, LINE_STRIP, NUM_LINKS + 1, joint_positions, GRAY);
         KELLY_DRAW_(2, POINTS, NUM_LINKS, joint_positions);
-
         END_FRAME();
     }
 }
@@ -697,6 +756,8 @@ void app_fk_3d() {
         END_FRAME();
     }
 }
+
+
 
 void app_ik_2d() {
     #define NUM_LINKS 5
@@ -802,18 +863,16 @@ void app_ik_2d() {
 
 
 
-
-
-
 int main() {
     // hello_c();
     // hello_linalg();
 
-    hello_triangle();
+    // hello_triangle();
     // hello_triangle_more_as_i_would_actually_write_it();
 
     // object_oriented_balls();
     // data_oriented_balls();
+    // XD_data_oriented_balls();
 
     // hello_balls();
     // hello_balls_plus_plus();
@@ -825,7 +884,9 @@ int main() {
     // app_draw();
     // app_draw_plus_plus();
 
+    app_fk_2d();
     // app_fk_3d();
+
     // app_ik_2d();
 
     return 0;
