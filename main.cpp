@@ -938,58 +938,66 @@ void hello_optimization() {
 
     while (!KEY_PRESSED['Q']) {
         BEGIN_FRAME(PV, 5, 'F', BLACK);
-        if (!KEY_TOGGLE[GLFW_KEY_SPACE]) {
 
-            // calculate the energy E and the gradient dEdx
-            real E = 0; // note: not actually used (we will need to be able to compute energy for line search)
-            vec2 *dEdx = (vec2 *) calloc(NUM_POINTS, sizeof(vec2));
-            {
-                for (int i = 0; i < NUM_POINTS; ++i) {
-                    for (int j = i + 1; j < NUM_POINTS; ++j) {
-                        // points x_i and x_j try should be at least minDistance apart
-                        real minDistance = .2;
-                        vec2 Delta = x[i] - x[j];
-                        if (norm(Delta) < minDistance) {
-                            real k = 1e0;
-                            E += k * pow((squaredNorm(Delta) - pow(minDistance, 2)), 2);
-                            vec2 dEdDelta = k * 2 * (squaredNorm(Delta) - pow(minDistance, 2)) * 2 * Delta;
-                            dEdx[i] += dEdDelta;
-                            dEdx[j] -= dEdDelta;
-                        }
-                    }
-
-                    if (MOUSE_LEFT_HELD) {
-                        // points x_i and the mouse should be at least minDistance apart
-                        real minDistance = .5;
+        // calculate the energy E and the gradient dEdx
+        real E = 0; // note: not actually used (we will need to be able to compute energy for line search)
+        vec2 *dEdx = (vec2 *) calloc(NUM_POINTS, sizeof(vec2));
+        {
+            for (int i = 0; i < NUM_POINTS; ++i) {
+                for (int j = i + 1; j < NUM_POINTS; ++j) {
+                    // points x_i and x_j try should be at least r apart
+                    real r = .2;
+                    vec2 Delta = x[i] - x[j];
+                    if (norm(Delta) < r) {
                         real k = 1e0;
-                        vec2 Delta = x[i] - MOUSE_POSITION;
-                        if (norm(Delta) < minDistance) {
-                            E += k * pow((squaredNorm(Delta) - pow(minDistance, 2)), 2);
-                            dEdx[i] += k * 2 * (squaredNorm(Delta) - pow(minDistance, 2)) * 2 * Delta;
-                        }
-                    }
-
-                    {
-                        // regularizer (point x_i shouldn't run super far away from the origin)
-                        real k = MOUSE_RIGHT_HELD ? 1e-2 : 1e-4;
-                        E += k * squaredNorm(x[i]);
-                        dEdx[i] += k * 2 * x[i];
+                        E += k * pow((squaredNorm(Delta) - pow(r, 2)), 2);
+                        vec2 dEdDelta = k * 2 * (squaredNorm(Delta) - pow(r, 2)) * 2 * Delta;
+                        dEdx[i] += dEdDelta;
+                        dEdx[j] -= dEdDelta;
                     }
                 }
+
+                if (MOUSE_LEFT_HELD) {
+                    // points x_i and the mouse should be at least r apart
+                    real r = .5;
+                    real k = 1e0;
+                    vec2 Delta = x[i] - MOUSE_POSITION;
+                    if (norm(Delta) < r) {
+                        E += k * pow((squaredNorm(Delta) - pow(r, 2)), 2);
+                        dEdx[i] += k * 2 * (squaredNorm(Delta) - pow(r, 2)) * 2 * Delta;
+                    }
+                }
+
+                if (KEY_HELD[GLFW_KEY_SPACE]) {
+                    // point x_i should stay inside circle of radius r
+                    real k = 1e-1;
+                    real r = 1;
+                    if (norm(x[i]) > r) {
+                        E += k * pow((squaredNorm(x[i]) - pow(r, 2)), 2);
+                        dEdx[i] += k * 2 * (squaredNorm(x[i]) - pow(r, 2)) * 2 * x[i];
+                    }
+                }
+
+                {
+                    // regularizer (point x_i shouldn't run super far away from the origin)
+                    real k = MOUSE_RIGHT_HELD ? 1e-2 : 1e-4;
+                    E += k * squaredNorm(x[i]);
+                    dEdx[i] += k * 2 * x[i];
+                }
             }
-
-            printf("E(x) = %lf\n", E);
-
-            // take a step of gradient descent (_without_ line search)
-            for_(i, NUM_POINTS) {
-                x[i] -= dEdx[i];
-            }
-
-            free(dEdx);
-
-            KELLY_DRAW_(2, POINTS, NUM_POINTS, x, 5);
-
         }
+
+        printf("E(x) = %lf\n", E);
+
+        // take a step of gradient descent (_without_ line search)
+        for_(i, NUM_POINTS) {
+            x[i] -= dEdx[i];
+        }
+
+        free(dEdx);
+
+        KELLY_DRAW_(2, POINTS, NUM_POINTS, x, 5);
+
         END_FRAME();
     }
     #undef NUM_POINTS
