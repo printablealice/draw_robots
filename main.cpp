@@ -949,9 +949,9 @@ void hello_optimization() {
                         real minDistance = .2;
                         vec2 Delta = x[i] - x[j];
                         if (norm(Delta) < minDistance) {
-                            real k = 2e1;
-                            E += k * pow((squaredNorm(Delta) / 2 - pow(minDistance, 2) / 2), 2) / 2;
-                            vec2 dEdDelta = k * (squaredNorm(Delta) / 2 - pow(minDistance, 2) / 2) * Delta;
+                            real k = 1e0;
+                            E += k * pow((squaredNorm(Delta) - pow(minDistance, 2)), 2);
+                            vec2 dEdDelta = k * 4 * (squaredNorm(Delta) - pow(minDistance, 2)) * Delta;
                             dEdx[i] += dEdDelta;
                             dEdx[j] -= dEdDelta;
                         }
@@ -960,22 +960,23 @@ void hello_optimization() {
                     if (MOUSE_LEFT_HELD) {
                         // points x_i and the mouse should be at least minDistance apart
                         real minDistance = .5;
-                        real k = 1e1;
+                        real k = 1e0;
                         vec2 Delta = x[i] - MOUSE_POSITION;
                         if (norm(Delta) < minDistance) {
-                            E += k * pow((squaredNorm(Delta) / 2 - pow(minDistance, 2) / 2), 2) / 2;
-                            dEdx[i] += k * (squaredNorm(Delta) / 2 - pow(minDistance, 2) / 2) * Delta;
+                            E += k * pow((squaredNorm(Delta) - pow(minDistance, 2)), 2);
+                            dEdx[i] += k * 4 * (squaredNorm(Delta) - pow(minDistance, 2)) * Delta;
                         }
                     }
 
                     {
                         // regularizer (point x_i shouldn't run super far away from the origin)
-                        real k = 1e-3;
-                        E += k * squaredNorm(x[i]) / 2;
-                        dEdx[i] += k * x[i];
+                        real k = 1e-5;
+                        E += k * squaredNorm(x[i]);
+                        dEdx[i] += k * 2 * x[i];
                     }
                 }
             }
+            printf("%lf\n", E);
 
             for_(i, NUM_POINTS) {
                 x[i] -= dEdx[i];
