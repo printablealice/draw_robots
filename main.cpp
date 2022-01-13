@@ -970,13 +970,13 @@ void hello_optimization() {
 
                     {
                         // regularizer (point x_i shouldn't run super far away from the origin)
-                        real k = 1e-5;
+                        real k = MOUSE_RIGHT_HELD ? 1e-2 : 1e-4;
                         E += k * squaredNorm(x[i]);
                         dEdx[i] += k * 2 * x[i];
                     }
                 }
             }
-            printf("%lf\n", E);
+            // printf("E(x) = %lf\n", E);
 
             for_(i, NUM_POINTS) {
                 x[i] -= dEdx[i];
