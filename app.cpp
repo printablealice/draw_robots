@@ -258,7 +258,7 @@ static void cursor_position_callback(GLFWwindow *, double xpos, double ypos) {
     #else
     _MOUSE_POSITION_Screen = 2 * V2(xpos, ypos);
     #endif
-    _MOUSE_POSITION_OFFSET_Screen = _MOUSE_POSITION_Screen - tmp; 
+    static bool INIT; if (!INIT) { INIT = true; } else { _MOUSE_POSITION_OFFSET_Screen = _MOUSE_POSITION_Screen - tmp; }
     _MOUSE_POSITION_NDC = transformPoint(get_NDC_from_Screen(), _MOUSE_POSITION_Screen);
 }
 void BAKE_MOUSE(mat4 NDC_from_World) {

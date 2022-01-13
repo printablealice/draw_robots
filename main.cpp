@@ -178,29 +178,25 @@ void BASIC_DRAG_POINTS_2D(int num_points, vec2 *points) {
     }
 }
 
+
 void hello_triangle_more_as_i_would_actually_write_it() {
-    // the data
-    vec2 points[] = { { 0, 0 }, { 1, 0 }, { 0, 1 } }; // vertex positions
-    vec3 colors[] = { RED, GREEN, BLUE };             // vertex colors
+    vec2 points[] = { { 0, 0 }, { 1, 0 }, { 0, 1 } };
+    vec3 colors[] = { RED, GREEN, BLUE };
 
     while (!KEY_PRESSED['Q']) {
         BEGIN_FRAME(PV, 2.5, 'F', BLACK);
         if (!KEY_TOGGLE[GLFW_KEY_SPACE]) {
             DRAW_(2, TRIANGLES, 3, points, colors);
             DRAW_(2, LINE_LOOP, 3, points, PURPLE);
-            // DRAG_2D_POINTS_(PV, 3, points, YELLOW);
-            BASIC_DRAG_POINTS_2D(3, points);
+            DRAG_2D_POINTS_(PV, 3, points, YELLOW);
         }
         END_FRAME();
     }
 }
 
 
-
-
-
 // balls apps we wrote in class
-#define NUM_BALLS 10000
+#define NUM_BALLS 5000
 struct Ball {
     vec2 position;
     vec2 velocity;
@@ -221,7 +217,6 @@ struct Ball {
     }
 };
 void object_oriented_balls() {
-
     Ball *balls = (Ball *) calloc(NUM_BALLS, sizeof(Ball));
     for (int i = 0; i < NUM_BALLS; ++i) {
         balls[i].position = { RAND(-1, 1), RAND(-1, 1) };
@@ -239,7 +234,6 @@ void object_oriented_balls() {
 
         END_FRAME();
     }
-
 }
 void data_oriented_balls() {
     vec2 *positions = (vec2 *) calloc(NUM_BALLS, sizeof(vec2));
@@ -272,47 +266,40 @@ void data_oriented_balls() {
     }
 }
 
-#define DIM 3
-#define vecX Vec<DIM>
-
+#define DIM 1
 void XD_data_oriented_balls() {
-    vecX *positions = (vecX *) calloc(NUM_BALLS, sizeof(vecX));
-    vecX *velocities = (vecX *) calloc(NUM_BALLS, sizeof(vecX));
-
-    vec3 *colors = (vec3 *) calloc(NUM_BALLS, sizeof(vec3));
+    double *positions = (double *) calloc(NUM_BALLS * DIM, sizeof(double));
+    double *velocities = (double *) calloc(NUM_BALLS * DIM, sizeof(double));
+    double *colors = (double *) calloc(NUM_BALLS * 3, sizeof(double));
     for (int i = 0; i < NUM_BALLS; ++i) {
         for (int d = 0; d < DIM; ++d) {
-            positions[i][d] = RAND(-1, 1);
-            velocities[i][d] = RAND(-1, 1);
+            positions[DIM * i + d] = RAND(-1, 1);
+            velocities[DIM * i + d] = RAND(-1, 1);
         }
-
-        colors[i] = { RAND(0, 1), RAND(0, 1), RAND(0, 1) };
+        for (int d = 0; d < 3; ++d) {
+            colors[DIM * i + d] = RAND(0, 1);
+        }
     }
-
     while (!KEY_PRESSED['Q']) {
         POLL_INPUT();
-        // false means you can use the mouse to move the camera
-        // 'C' can be used to toggle between orthographic and perspective views
         CAMERA_3D(PV, 2.5, false, 'C');
         FULLSCREEN_TOGGLE('F');
         CLEAR_DRAW_BUFFER(BLACK);
-
         for (int i = 0; i < NUM_BALLS; ++i) {
-            positions[i] += .01 * velocities[i];
             for (int d = 0; d < DIM; ++d) {
-                if (ABS(positions[i][d]) > 1) {
-                    velocities[i][d] *= -1;
+                positions[DIM * i + d] += .01 * velocities[DIM * i + d];
+                if (ABS(positions[DIM * i + d]) > 1) {
+                    velocities[DIM * i + d] *= -1;
                 }
             }
         }
-
-        DRAW_(DIM, POINTS, NUM_BALLS, positions, colors, 3.0);
-
+        DRAW_(DIM, POINTS, NUM_BALLS, positions, colors, 2);
         END_FRAME();
     }
 }
-#undef vecX
 #undef DIM
+#undef vecX
+
 #undef NUM_BALLS
 
 
@@ -861,9 +848,151 @@ void app_ik_2d() {
     #undef NUM_LINKS
 }
 
+void hello_speed_coding() {
+    vec2 *s = 0;
+    vec2 *v = 0;
+    vec3 *c = 0;
+    vec2 *particles_s = 0;
+    vec2 *particles_v = 0;
+    vec3 *particles_c = 0;
+    int *particles_age = 0;
+    vec3 *particles_c_buffer = 0;
+    for_(i, 1024) {
+        arrput(s, { RAND(-1, 1), RAND(-1, 1) });
+        arrput(v, { RAND(-1, 1), RAND(-1, 1) });
+        arrput(c, monokai(i));
+    }
+    while (!KEY_PRESSED['Q']) {
+        BEGIN_FRAME(PV, 5, 'F', AVG(GRAY, BLACK));
 
+        {
+            int *indices_to_delete = 0;
+            for_(i, arrlen(s)) {
+                s[i] += .016 * v[i];
+                for_(d, 2) if (ABS(s[i][d]) > 1) v[i][d] *= -1;
+                if (norm(MOUSE_POSITION - s[i]) < .1) {
+                    arrput(indices_to_delete, i);
+                    for____(12) {
+                        arrput(particles_s, s[i] + V2(RAND(-.05, .05), RAND(-.05, .05)));
+                        arrput(particles_v, v[i] + 2*MOUSE_POSITION_OFFSET + V2(RAND(-1, 1), RAND(0, 1)));
+                        arrput(particles_c, c[i] + V3(RAND(-.05, .05), RAND(-.05, .05), RAND(-.05, .05)));
+                        arrput(particles_age, 0);
+                        arrput(particles_c_buffer, {});
+                    }
+                }
+            }
+            for (int i = arrlen(indices_to_delete) - 1; i >= 0; --i) {
+                arrdelswap(s, indices_to_delete[i]);
+                arrdelswap(v, indices_to_delete[i]);
+                arrdelswap(c, indices_to_delete[i]);
+            }
+        }
+
+        {
+            int *indices_to_delete = 0;
+            for_(i, arrlen(particles_s)) {
+                particles_v[i] *= .99;
+                particles_v[i] += { 0, -.05 };
+                particles_s[i] += .033 * particles_v[i];
+                if (ABS(particles_s[i].y) > 2) particles_v[i].y *= -RAND(.45, .55);
+                if (ABS(particles_s[i].x) > 2) particles_v[i].x *= -.5;
+                particles_s[i].y = CLAMP(particles_s[i].y, -2, INFINITY);
+                particles_c[i];
+                ++(particles_age[i]);
+                particles_c_buffer[i] = (particles_age[i] < 10) ? WHITE : LERP(CLAMP((particles_age[i] - 30) / 256., 0, 1), particles_c[i], BLACK);
+                if (particles_age[i] > 300) arrput(indices_to_delete, i);
+            }
+            for (int i = arrlen(indices_to_delete) - 1; i >= 0; --i) {
+                arrdelswap(particles_s, indices_to_delete[i]);
+                arrdelswap(particles_v, indices_to_delete[i]);
+                arrdelswap(particles_c, indices_to_delete[i]);
+                arrdelswap(particles_c_buffer, indices_to_delete[i]);
+                arrdelswap(particles_age, indices_to_delete[i]);
+            }
+        }
+
+        {
+            double tmp[] = { -2, -2, 2, -2, 2, 2, -2, 2 };
+            DRAW_(2, QUADS, NITEMS(tmp) / 2, tmp, BLACK, 1);
+        }
+        {
+            double tmp[] = { -1, -1, 1, -1, 1, 1, -1, 1 };
+            DRAW_(2, QUADS, NITEMS(tmp) / 2, tmp, AVG(GRAY, BLACK), 1);
+        }
+        DRAW_(2, POINTS, arrlen(particles_s), particles_s, particles_c_buffer, 3);
+        DRAW_(2, POINTS, arrlen(s), s, c, 6);
+
+        END_FRAME();
+    }
+}
+
+void hello_optimization() {
+    // todo line search
+    // todo Newton's method
+
+    #define NUM_POINTS 256
+    vec2 *x = (vec2 *) calloc(NUM_POINTS, sizeof(vec2)); // { x0 y0 } { x1 y1 } ...
+    for (int i = 0; i < NUM_POINTS; ++i) {
+        x[i] = { RAND(-1, 1), RAND(-1, 1) };
+    }
+
+    while (!KEY_PRESSED['Q']) {
+        BEGIN_FRAME(PV, 5, 'F', BLACK);
+        if (!KEY_TOGGLE[GLFW_KEY_SPACE]) {
+
+            real E = 0; // note: not actually used (we will need to be able to compute energy for line search)
+            vec2 *dEdx = (vec2 *) calloc(NUM_POINTS, sizeof(vec2));
+            {
+                for (int i = 0; i < NUM_POINTS; ++i) {
+                    for (int j = i + 1; j < NUM_POINTS; ++j) {
+                        // points x_i and x_j try should be at least minDistance apart
+                        real minDistance = .2;
+                        vec2 Delta = x[i] - x[j];
+                        if (norm(Delta) < minDistance) {
+                            real k = 2e1;
+                            E += k * pow((squaredNorm(Delta) / 2 - pow(minDistance, 2) / 2), 2) / 2;
+                            vec2 dEdDelta = k * (squaredNorm(Delta) / 2 - pow(minDistance, 2) / 2) * Delta;
+                            dEdx[i] += dEdDelta;
+                            dEdx[j] -= dEdDelta;
+                        }
+                    }
+
+                    if (MOUSE_LEFT_HELD) {
+                        // points x_i and the mouse should be at least minDistance apart
+                        real minDistance = .5;
+                        real k = 1e1;
+                        vec2 Delta = x[i] - MOUSE_POSITION;
+                        if (norm(Delta) < minDistance) {
+                            E += k * pow((squaredNorm(Delta) / 2 - pow(minDistance, 2) / 2), 2) / 2;
+                            dEdx[i] += k * (squaredNorm(Delta) / 2 - pow(minDistance, 2) / 2) * Delta;
+                        }
+                    }
+
+                    {
+                        // regularizer (point x_i shouldn't run super far away from the origin)
+                        real k = 1e-3;
+                        E += k * squaredNorm(x[i]) / 2;
+                        dEdx[i] += k * x[i];
+                    }
+                }
+            }
+
+            for_(i, NUM_POINTS) {
+                x[i] -= dEdx[i];
+            }
+
+            free(dEdx);
+
+            KELLY_DRAW_(2, POINTS, NUM_POINTS, x, 5);
+
+        }
+        END_FRAME();
+    }
+    #undef NUM_POINTS
+}
 
 int main() {
+    // hello_speed_coding();
     // hello_c();
     // hello_linalg();
 
@@ -881,10 +1010,12 @@ int main() {
     // hello_pencil_another_way();
     // hello_pencil_with_std_vector();
 
+    hello_optimization();
+
     // app_draw();
     // app_draw_plus_plus();
 
-    app_fk_2d();
+    // app_fk_2d();
     // app_fk_3d();
 
     // app_ik_2d();
