@@ -940,6 +940,7 @@ void hello_optimization() {
         BEGIN_FRAME(PV, 5, 'F', BLACK);
         if (!KEY_TOGGLE[GLFW_KEY_SPACE]) {
 
+            // calculate the energy E and the gradient dEdx
             real E = 0; // note: not actually used (we will need to be able to compute energy for line search)
             vec2 *dEdx = (vec2 *) calloc(NUM_POINTS, sizeof(vec2));
             {
@@ -951,7 +952,7 @@ void hello_optimization() {
                         if (norm(Delta) < minDistance) {
                             real k = 1e0;
                             E += k * pow((squaredNorm(Delta) - pow(minDistance, 2)), 2);
-                            vec2 dEdDelta = k * 4 * (squaredNorm(Delta) - pow(minDistance, 2)) * Delta;
+                            vec2 dEdDelta = k * 2 * (squaredNorm(Delta) - pow(minDistance, 2)) * 2 * Delta;
                             dEdx[i] += dEdDelta;
                             dEdx[j] -= dEdDelta;
                         }
@@ -964,7 +965,7 @@ void hello_optimization() {
                         vec2 Delta = x[i] - MOUSE_POSITION;
                         if (norm(Delta) < minDistance) {
                             E += k * pow((squaredNorm(Delta) - pow(minDistance, 2)), 2);
-                            dEdx[i] += k * 4 * (squaredNorm(Delta) - pow(minDistance, 2)) * Delta;
+                            dEdx[i] += k * 2 * (squaredNorm(Delta) - pow(minDistance, 2)) * 2 * Delta;
                         }
                     }
 
@@ -976,8 +977,10 @@ void hello_optimization() {
                     }
                 }
             }
-            // printf("E(x) = %lf\n", E);
 
+            printf("E(x) = %lf\n", E);
+
+            // take a step of gradient descent (_without_ line search)
             for_(i, NUM_POINTS) {
                 x[i] -= dEdx[i];
             }
